@@ -1,0 +1,983 @@
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\creat_data_lists.py
+################################################################################
+
+from utils import create_data_lists
+if __name__ == '__main__':
+    create_data_lists(train_folders=[
+        'C:/Users\\cbbis\\Desktop\\Data_fusion/x10/train'], test_folders=[
+        'C:/Users/cbbis/Desktop/Data_fusion/x10/test'], min_size=10,
+        output_folder='C:/Users/cbbis/Desktop/Data_fusion/data')
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\creat_trainImage_lists.py
+################################################################################
+
+import sys
+sys.path.append('D:\\研一\\南网数研院\\GAN\torch2padle/utils')
+import paddle_aux
+import os
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+from PIL import Image
+BUS = [4, 8, 11, 15, 18, 27, 31]
+file_path = 'C:\\Users\\cbbis\\Desktop\\Data_fusion\\x10\\train_7\\V.xlsx'
+Vm = pd.read_excel(file_path, header=None).values
+scaler = MinMaxScaler(feature_range=(0, 255))
+for i in range(64, 71):
+    data = Vm[90000:100000, BUS[i - 64] - 1].reshape(-1, 1)
+    matrix = scaler.fit_transform(data)
+    n = 100
+    normalized_matrix = matrix.reshape(-1, n)
+    RGB_matrix = normalized_matrix.astype(np.uint8)
+    rgb_image = np.dstack((RGB_matrix, RGB_matrix, RGB_matrix))
+    image_path = os.path.join(
+        'C:\\Users\\cbbis\\Desktop\\Data_fusion\\x10\\train_real', f'{i}.bmp')
+    Image.fromarray(rgb_image).save(image_path)
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\datasets.py
+################################################################################
+
+import paddle
+import os
+import json
+from PIL import Image
+from utils import ImageTransforms
+
+
+class SRDataset(paddle.io.Dataset):
+    """
+    数据集加载器
+    """
+
+    def __init__(self, data_folder, split, crop_size, scaling_factor,
+        lr_img_type, hr_img_type, test_data_name=None):
+        """
+        :参数 data_folder: # Json数据文件所在文件夹路径
+        :参数 split: 'train' 或者 'test'
+        :参数 crop_size: 高分辨率图像裁剪尺寸  （实际训练时不会用原图进行放大，而是截取原图的一个子块进行放大）
+        :参数 scaling_factor: 放大比例
+        :参数 lr_img_type: 低分辨率图像预处理方式
+        :参数 hr_img_type: 高分辨率图像预处理方式
+        :参数 test_data_name: 如果是评估阶段，则需要给出具体的待评估数据集名称，例如 "Set14"
+        """
+        self.data_folder = data_folder
+        self.split = split.lower()
+        self.crop_size = int(crop_size)
+        self.scaling_factor = int(scaling_factor)
+        self.lr_img_type = lr_img_type
+        self.hr_img_type = hr_img_type
+        self.test_data_name = test_data_name
+        assert self.split in {'train', 'test'}
+        if self.split == 'test' and self.test_data_name is None:
+            raise ValueError('请提供测试数据集名称!')
+        assert lr_img_type in {'[0, 255]', '[0, 1]', '[-1, 1]', 'imagenet-norm'
+            }
+        assert hr_img_type in {'[0, 255]', '[0, 1]', '[-1, 1]', 'imagenet-norm'
+            }
+        if self.split == 'train':
+            assert self.crop_size % self.scaling_factor == 0, '裁剪尺寸不能被放大比例整除!'
+        if self.split == 'train':
+            with open(os.path.join(data_folder, 'train_images.json'), 'r'
+                ) as j:
+                self.images = json.load(j)
+        else:
+            with open(os.path.join(data_folder, self.test_data_name +
+                '_test_images.json'), 'r') as j:
+                self.images = json.load(j)
+        self.transform = ImageTransforms(split=self.split, crop_size=self.
+            crop_size, scaling_factor=self.scaling_factor, lr_img_type=self
+            .lr_img_type, hr_img_type=self.hr_img_type)
+
+    def __getitem__(self, i):
+        """
+        为了使用PyTorch的DataLoader，必须提供该方法.
+
+        :参数 i: 图像检索号
+        :返回: 返回第i个低分辨率和高分辨率的图像对
+        """
+        img = Image.open(self.images[i], mode='r')
+        img = img.convert('RGB')
+        if img.width <= 100 or img.height <= 100:
+            print(self.images[i], img.width, img.height)
+        lr_img, hr_img = self.transform(img)
+        return lr_img, hr_img
+
+    def __len__(self):
+        """
+        为了使用PyTorch的DataLoader，必须提供该方法.
+
+        :返回: 加载的图像总数
+        """
+        return len(self.images)
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\model.py
+################################################################################
+
+import paddle
+import math
+
+
+class ConvolutionalBlock(paddle.nn.Layer):
+    """
+    卷积模块,由卷积层, BN归一化层, 激活层构成.
+    """
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+        batch_norm=False, activation=None):
+        """
+        :参数 in_channels: 输入通道数
+        :参数 out_channels: 输出通道数
+        :参数 kernel_size: 核大小
+        :参数 stride: 步长
+        :参数 batch_norm: 是否包含BN层
+        :参数 activation: 激活层类型; 如果没有则为None
+        """
+        super(ConvolutionalBlock, self).__init__()
+        if activation is not None:
+            activation = activation.lower()
+            assert activation in {'prelu', 'leakyrelu', 'tanh'}
+        layers = list()
+        layers.append(paddle.nn.Conv2D(in_channels=in_channels,
+            out_channels=out_channels, kernel_size=kernel_size, stride=
+            stride, padding=kernel_size // 2))
+        if batch_norm is True:
+            layers.append(paddle.nn.BatchNorm2D(num_features=out_channels))
+        if activation == 'prelu':
+            layers.append(paddle.nn.PReLU())
+        elif activation == 'leakyrelu':
+            layers.append(paddle.nn.LeakyReLU(negative_slope=0.2))
+        elif activation == 'tanh':
+            layers.append(paddle.nn.Tanh())
+        self.conv_block = paddle.nn.Sequential(*layers)
+
+    def forward(self, input):
+        """
+        前向传播
+
+        :参数 input: 输入图像集，张量表示，大小为 (N, in_channels, w, h)
+        :返回: 输出图像集，张量表示，大小为(N, out_channels, w, h)
+        """
+        output = self.conv_block(input)
+        return output
+
+
+class SubPixelConvolutionalBlock(paddle.nn.Layer):
+    """
+    子像素卷积模块, 包含卷积, 像素清洗和激活层.
+    """
+
+    def __init__(self, kernel_size=3, n_channels=64, scaling_factor=2):
+        """
+        :参数 kernel_size: 卷积核大小
+        :参数 n_channels: 输入和输出通道数
+        :参数 scaling_factor: 放大比例
+        """
+        super(SubPixelConvolutionalBlock, self).__init__()
+        self.conv = paddle.nn.Conv2D(in_channels=n_channels, out_channels=
+            n_channels * scaling_factor ** 2, kernel_size=kernel_size,
+            padding=kernel_size // 2)
+        self.pixel_shuffle = paddle.nn.PixelShuffle(upscale_factor=
+            scaling_factor)
+        self.prelu = paddle.nn.PReLU()
+
+    def forward(self, input):
+        """
+        前向传播.
+
+        :参数 input: 输入图像数据集，张量表示，大小为(N, n_channels, w, h)
+        :返回: 输出图像数据集，张量表示，大小为 (N, n_channels, w * scaling factor, h * scaling factor)
+        """
+        output = self.conv(input)
+        output = self.pixel_shuffle(output)
+        output = self.prelu(output)
+        return output
+
+
+class ResidualBlock(paddle.nn.Layer):
+    """
+    残差模块, 包含两个卷积模块和一个跳连.
+    """
+
+    def __init__(self, kernel_size=3, n_channels=64):
+        """
+        :参数 kernel_size: 核大小
+        :参数 n_channels: 输入和输出通道数（由于是ResNet网络，需要做跳连，因此输入和输出通道数是一致的）
+        """
+        super(ResidualBlock, self).__init__()
+        self.conv_block1 = ConvolutionalBlock(in_channels=n_channels,
+            out_channels=n_channels, kernel_size=kernel_size, batch_norm=
+            True, activation='PReLu')
+        self.conv_block2 = ConvolutionalBlock(in_channels=n_channels,
+            out_channels=n_channels, kernel_size=kernel_size, batch_norm=
+            True, activation=None)
+
+    def forward(self, input):
+        """
+        前向传播.
+
+        :参数 input: 输入图像集，张量表示，大小为 (N, n_channels, w, h)
+        :返回: 输出图像集，张量表示，大小为 (N, n_channels, w, h)
+        """
+        residual = input
+        output = self.conv_block1(input)
+        output = self.conv_block2(output)
+        output = output + residual
+        return output
+
+
+class SRResNet(paddle.nn.Layer):
+    """
+    SRResNet模型
+    """
+
+    def __init__(self, large_kernel_size=9, small_kernel_size=3, n_channels
+        =64, n_blocks=5, scaling_factors=8, target_size=(100, 100)):
+        """
+        :参数 large_kernel_size: 第一层卷积和最后一层卷积核大小
+        :参数 small_kernel_size: 中间层卷积核大小
+        :参数 n_channels: 中间层通道数
+        :参数 n_blocks: 残差模块数
+        :参数 scaling_factor: 放大比例
+        """
+        super(SRResNet, self).__init__()
+        scaling_factors = int(scaling_factors)
+        assert scaling_factors in {2, 4, 8}, '放大比例必须为 2、 4 或 8!'
+        self.conv_block1 = ConvolutionalBlock(in_channels=3, out_channels=
+            n_channels, kernel_size=large_kernel_size, batch_norm=False,
+            activation='PReLu')
+        self.residual_blocks = paddle.nn.Sequential(*[ResidualBlock(
+            kernel_size=small_kernel_size, n_channels=n_channels) for i in
+            range(n_blocks)])
+        self.conv_block2 = ConvolutionalBlock(in_channels=n_channels,
+            out_channels=n_channels, kernel_size=small_kernel_size,
+            batch_norm=True, activation=None)
+        n_subpixel_convolution_blocks = int(math.log2(scaling_factors))
+        self.subpixel_convolutional_blocks = paddle.nn.Sequential(*[
+            SubPixelConvolutionalBlock(kernel_size=small_kernel_size,
+            n_channels=n_channels, scaling_factor=2) for i in range(
+            n_subpixel_convolution_blocks)])
+        self.conv_block3 = ConvolutionalBlock(in_channels=n_channels,
+            out_channels=3, kernel_size=large_kernel_size, batch_norm=False,
+            activation='Tanh')
+        self.target_size = target_size
+
+    def forward(self, lr_imgs):
+        """
+        前向传播.
+
+        :参数 lr_imgs: 低分辨率输入图像集, 张量表示，大小为 (N, 3, w, h)
+        :返回: 高分辨率输出图像集, 张量表示， 大小为 (N, 3, w * scaling factor, h * scaling factor)
+        """
+        output = self.conv_block1(lr_imgs)
+        residual = output
+        output = self.residual_blocks(output)
+        output = self.conv_block2(output)
+        output = output + residual
+        output = self.subpixel_convolutional_blocks(output)
+        output = paddle.nn.functional.interpolate(x=output, size=self.
+            target_size, mode='bilinear', align_corners=False)
+        sr_imgs = self.conv_block3(output)
+        return sr_imgs
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\test.py
+################################################################################
+
+import sys
+sys.path.append('D:\\研一\\南网数研院\\GAN\torch2padle/utils')
+import paddle_aux
+import paddle
+import os
+from utils import *
+from models import SRResNet
+import time
+from PIL import Image
+import numpy as np
+from scipy.stats import norm
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+MeasurePMU_Vm = np.zeros((39, 10000))
+measureRTU_Vm = np.zeros((39, 10000))
+file_path = 'C:\\Users\\cbbis\\Desktop\\Data_fusion\\x10\\train_7\\V.xlsx'
+Vm = pd.read_excel(file_path, header=None).values
+for o in range(10000):
+    error = [0.001, 0.003]
+    MeasurePMU_Vm[:, o] = Vm[:, o] * (1 + norm.rvs(size=39, scale=error[0]))
+    measureRTU_Vm[:, o] = Vm[:, o] * (1 + norm.rvs(size=39, scale=error[1]))
+for k in range(1, 101):
+    MeasureRTU_Vm[:, k - 1] = measureRTU_Vm[:, (k - 1) * 100]
+scaler = MinMaxScaler(feature_range=(0, 255))
+n = 10
+i = 12
+data = MeasureRTU_Vm[i - 1, :]
+matrix = scaler.fit_transform(data.reshape(-1, 1)).flatten()
+normalized_matrix = matrix.reshape(-1, n)
+RGB_matrix = normalized_matrix.astype(np.uint8)
+rgb_image = np.dstack((RGB_matrix, RGB_matrix, RGB_matrix))
+image_path = os.path.join(
+    'C:\\Users\\cbbis\\Desktop\\Data_fusion\\x10\\test_6.8_7.1', f'{i}.bmp')
+Image.fromarray(rgb_image).save(image_path)
+imgPath = 'C:/Users/cbbis/Desktop/Data_fusion/x10/test_6.8_7.1/i.bmp'
+large_kernel_size = 9
+small_kernel_size = 3
+n_channels = 64
+n_blocks = 5
+scaling_factor = 10
+scaling_factors = 8
+target_size = 100, 100
+device = str('cuda' if paddle.device.cuda.device_count() >= 1 else 'cpu'
+    ).replace('cuda', 'gpu')
+if __name__ == '__main__':
+    srresnet_checkpoint = (
+        'C:/Users/cbbis/Desktop/Data_fusion/x10/results_shuff3_5/checkpoint_srresnet.pth'
+        )
+    checkpoint = paddle.load(path=srresnet_checkpoint)
+    srresnet = SRResNet(large_kernel_size=large_kernel_size,
+        small_kernel_size=small_kernel_size, n_channels=n_channels,
+        n_blocks=n_blocks, scaling_factors=scaling_factors)
+    srresnet = srresnet.to(device)
+    srresnet.set_state_dict(state_dict=checkpoint['model'])
+    srresnet.eval()
+    model = srresnet
+    img = Image.open(imgPath, mode='r')
+    img = img.convert('RGB')
+    Bicubic_img = img.resize((int(img.width * scaling_factor), int(img.
+        height * scaling_factor)), Image.BICUBIC)
+    Bicubic_img.save(
+        'C:/Users/cbbis/Desktop/Data_fusion/x10/results_shuff3_5/test_bicubic.bmp'
+        )
+    lr_img = convert_image(img, source='pil', target='imagenet-norm')
+    lr_img.unsqueeze_(axis=0)
+    start = time.time()
+    lr_img = lr_img.to(device)
+    with paddle.no_grad():
+        sr_img = model(lr_img).squeeze(axis=0).cpu().detach()
+        sr_img = convert_image(sr_img, source='[-1, 1]', target='pil')
+        sr_img.save(
+            'C:/Users/cbbis/Desktop/Data_fusion/x10/results_shuff3_5/test_srresnet.bmp'
+            )
+    print('用时  {:.3f} 秒'.format(time.time() - start))
+image_path = (
+    'C:/Users/cbbis/Desktop/Data_fusion/x10/results_shuff3_5/test_srresnet.bmp'
+    )
+image = Image.open(image_path).convert('L')
+image_vector = np.array(image).flatten() / 255.0
+A = MeasurePMU_Vm[i, :].T
+Vm_i = Vm[i, :]
+Original_Value = image_vector * (A.max() - A.min()) + A.min()
+x = np.arange(0.01, 100.01, 0.01)
+plt.figure()
+plt.plot(x, Original_Value[:10000], '-r', label='RTU pseudo-measurement')
+plt.plot(x, Vm_i[:10000], '-k', label='True value')
+plt.hold(True)
+plt.xlabel('time/s')
+plt.ylabel('Voltage amplitude/p.u.')
+plt.legend()
+plt.show()
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\train_srgan.py
+################################################################################
+
+import paddle
+from models import Generator, Discriminator
+from datasets import SRDataset
+from utils import *
+from visualdl import LogWriter
+data_folder = 'D:\\Data_fusion\\data'
+crop_size = 100
+scaling_factors = 8
+scaling_factor = 10
+target_size = 100, 100
+large_kernel_size_g = 9
+small_kernel_size_g = 3
+n_channels_g = 64
+n_blocks_g = 5
+srresnet_checkpoint = (
+    'D:\\Data_fusion/x10/results_meas/db9/horizontal/checkpoint_srresnet.pth')
+kernel_size_d = 3
+n_channels_d = 64
+n_blocks_d = 8
+fc_size_d = 1024
+batch_size = 128
+start_epoch = 1
+epochs = 50
+checkpoint = None
+workers = 4
+beta = 0.001
+lr = 0.001
+device = str('cuda' if paddle.device.cuda.device_count() >= 1 else 'cpu'
+    ).replace('cuda', 'gpu')
+ngpu = 1
+False = True
+writer = LogWriter()
+
+
+def main():
+    """
+    训练.
+    """
+    global checkpoint, start_epoch, writer
+    generator = Generator(large_kernel_size=large_kernel_size_g,
+        small_kernel_size=small_kernel_size_g, n_channels=n_channels_g,
+        n_blocks=n_blocks_g, scaling_factors=scaling_factors)
+    discriminator = Discriminator(kernel_size=kernel_size_d, n_channels=
+        n_channels_d, n_blocks=n_blocks_d, fc_size=fc_size_d)
+    optimizer_g = paddle.optimizer.Adam(parameters=filter(lambda p: not p.
+        stop_gradient, generator.parameters()), learning_rate=lr,
+        weight_decay=1e-05)
+    optimizer_d = paddle.optimizer.Adam(parameters=filter(lambda p: not p.
+        stop_gradient, discriminator.parameters()), learning_rate=lr,
+        weight_decay=1e-05)
+    content_loss_criterion = paddle.nn.MSELoss()
+    adversarial_loss_criterion = paddle.nn.BCEWithLogitsLoss()
+    generator = generator.to(device)
+    discriminator = discriminator.to(device)
+    content_loss_criterion = content_loss_criterion.to(device)
+    adversarial_loss_criterion = adversarial_loss_criterion.to(device)
+    srresnetcheckpoint = paddle.load(path=srresnet_checkpoint)
+    generator.net.load_state_dict(srresnetcheckpoint['model'])
+    if checkpoint is not None:
+        checkpoint = paddle.load(path=checkpoint)
+        start_epoch = checkpoint['epoch'] + 1
+        generator.set_state_dict(state_dict=checkpoint['generator'])
+        discriminator.set_state_dict(state_dict=checkpoint['discriminator'])
+        optimizer_g.set_state_dict(state_dict=checkpoint['optimizer_g'])
+        optimizer_d.set_state_dict(state_dict=checkpoint['optimizer_d'])
+    if paddle.device.cuda.device_count() >= 1 and ngpu > 1:
+        generator = paddle.DataParallel(layers=generator)
+        discriminator = paddle.DataParallel(layers=discriminator)
+    train_dataset = SRDataset(data_folder, split='train', crop_size=
+        crop_size, scaling_factor=scaling_factor, lr_img_type=
+        'imagenet-norm', hr_img_type='imagenet-norm')
+    train_loader = paddle.io.DataLoader(dataset=train_dataset, batch_size=
+        batch_size, shuffle=True, num_workers=workers)
+    for epoch in range(start_epoch, epochs + 1):
+        if epoch == int(epochs / 2):
+            adjust_learning_rate(optimizer_g, 0.1)
+            adjust_learning_rate(optimizer_d, 0.1)
+            print(f'Learning rate adjusted at epoch {epoch}')
+        generator.train()
+        discriminator.train()
+        losses_c = AverageMeter()
+        losses_a = AverageMeter()
+        losses_d = AverageMeter()
+        n_iter = len(train_loader)
+        for i, (lr_imgs, hr_imgs) in enumerate(train_loader):
+            lr_imgs = lr_imgs.to(device)
+            hr_imgs = hr_imgs.to(device)
+            sr_imgs = generator(lr_imgs)
+            sr_imgs = convert_image(sr_imgs, source='[-1, 1]', target=
+                'imagenet-norm')
+            content_loss = content_loss_criterion(sr_imgs, hr_imgs)
+            sr_discriminated = discriminator(sr_imgs)
+            adversarial_loss = adversarial_loss_criterion(sr_discriminated,
+                paddle.ones_like(x=sr_discriminated))
+            perceptual_loss = content_loss + beta * adversarial_loss
+            """Class Method: *.zero_grad, can not convert, please check whether it is torch.Tensor.*/Optimizer.*/nn.Module.*/torch.distributions.Distribution.*/torch.autograd.function.FunctionCtx.*/torch.profiler.profile.*/torch.autograd.profiler.profile.*, and convert manually"""
+            optimizer_g.clear_grad()
+            perceptual_loss.backward()
+            optimizer_g.step()
+            losses_c.update(content_loss.item(), lr_imgs.shape[0])
+            losses_a.update(adversarial_loss.item(), lr_imgs.shape[0])
+            hr_discriminated = discriminator(hr_imgs)
+            sr_discriminated = discriminator(sr_imgs.detach())
+            adversarial_loss = adversarial_loss_criterion(sr_discriminated,
+                paddle.zeros_like(x=sr_discriminated)
+                ) + adversarial_loss_criterion(hr_discriminated, paddle.
+                ones_like(x=hr_discriminated))
+            """Class Method: *.zero_grad, can not convert, please check whether it is torch.Tensor.*/Optimizer.*/nn.Module.*/torch.distributions.Distribution.*/torch.autograd.function.FunctionCtx.*/torch.profiler.profile.*/torch.autograd.profiler.profile.*, and convert manually"""
+            optimizer_d.clear_grad()
+            adversarial_loss.backward()
+            optimizer_d.step()
+            losses_d.update(adversarial_loss.item(), hr_imgs.shape[0])
+            if i == n_iter - 2:
+                writer.add_image('SRGAN/epoch_' + str(epoch) + '_1',
+                    torchvision.utils.make_grid(lr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+                writer.add_image('SRGAN/epoch_' + str(epoch) + '_2',
+                    torchvision.utils.make_grid(sr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+                writer.add_image('SRGAN/epoch_' + str(epoch) + '_3',
+                    torchvision.utils.make_grid(hr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+            print('第 ' + str(i) + ' 个batch结束')
+        del lr_imgs, hr_imgs, sr_imgs, hr_discriminated, sr_discriminated
+        writer.add_scalar('SRGAN/Loss_c', losses_c.val, epoch)
+        writer.add_scalar('SRGAN/Loss_a', losses_a.val, epoch)
+        writer.add_scalar('SRGAN/Loss_d', losses_d.val, epoch)
+        paddle.save(obj={'epoch': epoch, 'generator': generator.state_dict(
+            ), 'discriminator': discriminator.state_dict(), 'optimizer_g':
+            optimizer_g.state_dict(), 'optimizer_d': optimizer_d.state_dict
+            ()}, path=
+            'D:\\Data_fusion/x10/results_meas/db9/horizontal/checkpoint_srgan.pth'
+            )
+        writer.close()
+
+
+if __name__ == '__main__':
+    main()
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\train_srresnet.py
+################################################################################
+
+import paddle
+from models import SRResNet
+from datasets import SRDataset
+from utils import *
+from visualdl import LogWriter
+
+data_folder = 'C:/Users/cbbis/Desktop/Data_fusion/data'
+crop_size = 100
+scaling_factor = 10
+scaling_factors = 8
+target_size = 100, 100
+large_kernel_size = 9
+small_kernel_size = 3
+n_channels = 64
+n_blocks = 16
+checkpoint = None
+batch_size = 64
+start_epoch = 1
+epochs = 180
+workers = 4
+lr = 0.0001
+device = str('cuda' if paddle.device.cuda.device_count() >= 1 else 'cpu'
+    ).replace('cuda', 'gpu')
+ngpu = 1
+False = True
+writer = LogWriter()
+
+
+def main():
+    """
+    训练.
+    """
+    global checkpoint, start_epoch
+    model = SRResNet(large_kernel_size=large_kernel_size, small_kernel_size
+        =small_kernel_size, n_channels=n_channels, n_blocks=n_blocks,
+        scaling_factors=scaling_factors)
+    optimizer = paddle.optimizer.Adam(parameters=filter(lambda p: not p.
+        stop_gradient, model.parameters()), learning_rate=lr, weight_decay=0.0)
+    model = model.to(device)
+    criterion = paddle.nn.MSELoss().to(device)
+    if checkpoint is not None:
+        checkpoint = paddle.load(path=checkpoint)
+        start_epoch = checkpoint['epoch'] + 1
+        model.set_state_dict(state_dict=checkpoint['model'])
+        optimizer.set_state_dict(state_dict=checkpoint['optimizer'])
+    if paddle.device.cuda.device_count() >= 1 and ngpu > 1:
+        model = paddle.DataParallel(layers=model)
+    train_dataset = SRDataset(data_folder, split='train', crop_size=
+        crop_size, scaling_factor=scaling_factor, lr_img_type=
+        'imagenet-norm', hr_img_type='[-1, 1]')
+    train_loader = paddle.io.DataLoader(dataset=train_dataset, batch_size=
+        batch_size, shuffle=True, num_workers=workers)
+    for epoch in range(start_epoch, epochs + 1):
+        model.train()
+        loss_epoch = AverageMeter()
+        n_iter = len(train_loader)
+        for i, (lr_imgs, hr_imgs) in enumerate(train_loader):
+            lr_imgs = lr_imgs.to(device)
+            hr_imgs = hr_imgs.to(device)
+            sr_imgs = model(lr_imgs)
+            loss = criterion(sr_imgs, hr_imgs)
+            """Class Method: *.zero_grad, can not convert, please check whether it is torch.Tensor.*/Optimizer.*/nn.Module.*/torch.distributions.Distribution.*/torch.autograd.function.FunctionCtx.*/torch.profiler.profile.*/torch.autograd.profiler.profile.*, and convert manually"""
+            optimizer.clear_grad()
+            loss.backward()
+            optimizer.step()
+            loss_epoch.update(loss.item(), lr_imgs.shape[0])
+            if i == n_iter - 2:
+                writer.add_image('SRResNet/epoch_' + str(epoch) + '_1',
+                    torchvision.utils.make_grid(lr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+                writer.add_image('SRResNet/epoch_' + str(epoch) + '_2',
+                    torchvision.utils.make_grid(sr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+                writer.add_image('SRResNet/epoch_' + str(epoch) + '_3',
+                    torchvision.utils.make_grid(hr_imgs[:4, :3, :, :].cpu(),
+                    nrow=4, normalize=True), epoch)
+            print('第 ' + str(i) + ' 个batch训练结束')
+        del lr_imgs, hr_imgs, sr_imgs
+        writer.add_scalar('SRResNet/MSE_Loss', loss_epoch.val, epoch)
+        paddle.save(obj={'epoch': epoch, 'model': model.state_dict(),
+            'optimizer': optimizer.state_dict()}, path=
+            'C:/Users\\cbbis\\Desktop\\Data_fusion/x10/results_shuff2/checkpoint_srresnet.pth'
+            )
+    writer.close()
+
+
+if __name__ == '__main__':
+    main()
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\txtto.py
+################################################################################
+
+import os
+
+def collect_py_files(directory):
+    py_files = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.py'):
+                py_files.append(os.path.join(root, file))
+    return py_files
+
+def write_contents_to_file(py_files, output_file):
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        for py_file in py_files:
+            # 写入文件名作为注释
+            outfile.write(f"\n\n{'#' * 80}\n")
+            outfile.write(f"# File: {py_file}\n")
+            outfile.write(f"{'#' * 80}\n\n")
+
+            # 读取并写入文件内容
+            with open(py_file, 'r', encoding='utf-8') as infile:
+                outfile.write(infile.read())
+
+# 指定目录和输出文件
+directory = r"D:\研一\南网数研院\GAN\torch2padle"
+output_file = r"D:\研一\南网数研院\GAN\torch2padle\all_py_files_content.txt"
+
+# 收集所有 .py 文件
+py_files = collect_py_files(directory)
+
+# 写入内容到输出文件
+write_contents_to_file(py_files, output_file)
+
+print(f"所有 .py 文件的内容已保存到 {output_file}")
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\utils.py
+################################################################################
+
+import paddle
+import os
+from PIL import Image
+import json
+import random
+import math
+from skimage.metrics import peak_signal_noise_ratio as compare_psnr
+device = str('cuda' if paddle.device.cuda.device_count() >= 1 else 'cpu'
+    ).replace('cuda', 'gpu')
+rgb_weights = paddle.to_tensor(data=[65.481, 128.553, 24.966], dtype='float32'
+    ).to(device)
+imagenet_mean = paddle.to_tensor(data=[0.485, 0.456, 0.406], dtype='float32'
+    ).unsqueeze(axis=1).unsqueeze(axis=2)
+imagenet_std = paddle.to_tensor(data=[0.229, 0.224, 0.225], dtype='float32'
+    ).unsqueeze(axis=1).unsqueeze(axis=2)
+imagenet_mean_cuda = paddle.to_tensor(data=[0.485, 0.456, 0.406], dtype=
+    'float32').to(device).unsqueeze(axis=0).unsqueeze(axis=2).unsqueeze(axis=3)
+imagenet_std_cuda = paddle.to_tensor(data=[0.229, 0.224, 0.225], dtype=
+    'float32').to(device).unsqueeze(axis=0).unsqueeze(axis=2).unsqueeze(axis=3)
+
+
+def create_data_lists(train_folders, test_folders, min_size, output_folder):
+    """
+    创建训练集和测试集列表文件.
+        参数 train_folders: 训练文件夹集合; 各文件夹中的图像将被合并到一个图片列表文件里面
+        参数 test_folders: 测试文件夹集合; 每个文件夹将形成一个图片列表文件
+        参数 min_size: 图像宽、高的最小容忍值
+        参数 output_folder: 最终生成的文件列表,json格式
+    """
+    print('\n正在创建文件列表... 请耐心等待.\n')
+    train_images = list()
+    for d in train_folders:
+        for i in os.listdir(d):
+            img_path = os.path.join(d, i)
+            img = Image.open(img_path, mode='r')
+            if img.width >= min_size and img.height >= min_size:
+                train_images.append(img_path)
+    print('训练集中共有 %d 张图像\n' % len(train_images))
+    with open(os.path.join(output_folder, 'train_images.json'), 'w') as j:
+        json.dump(train_images, j)
+    for d in test_folders:
+        test_images = list()
+        test_name = d.split('/')[-1]
+        for i in os.listdir(d):
+            img_path = os.path.join(d, i)
+            img = Image.open(img_path, mode='r')
+            if img.width >= min_size and img.height >= min_size:
+                test_images.append(img_path)
+        print('在测试集 %s 中共有 %d 张图像\n' % (test_name, len(test_images)))
+        with open(os.path.join(output_folder, test_name +
+            '_test_images.json'), 'w') as j:
+            json.dump(test_images, j)
+    print('生成完毕。训练集和测试集文件列表已保存在 %s 下\n' % output_folder)
+
+
+def convert_image(img, source, target):
+    """
+    转换图像格式.
+
+    :参数 img: 输入图像
+    :参数 source: 数据源格式, 共有3种
+                   (1) 'pil' (PIL图像)
+                   (2) '[0, 1]'
+                   (3) '[-1, 1]'
+    :参数 target: 数据目标格式, 共5种
+                   (1) 'pil' (PIL图像)
+                   (2) '[0, 1]'
+                   (3) '[-1, 1]'
+                   (4) 'imagenet-norm' (由imagenet数据集的平均值和方差进行标准化)
+                   (5) 'y-channel' (亮度通道Y，采用YCbCr颜色空间, 用于计算PSNR 和 SSIM)
+    :返回: 转换后的图像
+    """
+    assert source in {'pil', '[0, 1]', '[-1, 1]'}, '无法转换图像源格式 %s!' % source
+    assert target in {'pil', '[0, 255]', '[0, 1]', '[-1, 1]',
+        'imagenet-norm', 'y-channel'}, '无法转换图像目标格式t %s!' % target
+    if source == 'pil':
+        img = paddle.vision.transforms.functional.to_tensor(img)
+    elif source == '[0, 1]':
+        pass
+    elif source == '[-1, 1]':
+        img = (img + 1.0) / 2.0
+    if target == 'pil':
+        img = Image.fromarray(np.uint8(img.numpy() * 255).transpose(1, 2, 0)).convert('RGB')
+    elif target == '[0, 255]':
+        img = 255.0 * img
+    elif target == '[0, 1]':
+        pass
+    elif target == '[-1, 1]':
+        img = 2.0 * img - 1.0
+    elif target == 'imagenet-norm':
+        if img.ndimension() == 3:
+            img = (img - imagenet_mean) / imagenet_std
+        elif img.ndimension() == 4:
+            img = (img - imagenet_mean_cuda) / imagenet_std_cuda
+    elif target == 'y-channel':
+        img = paddle.matmul(x=255.0 * img.transpose(perm=[0, 2, 3, 1])[:, 4
+            :-4, 4:-4, :], y=rgb_weights) / 255.0 + 16.0
+    return img
+
+
+class ImageTransforms(object):
+    """
+    图像变换.
+    """
+
+    def __init__(self, split, crop_size, scaling_factor, lr_img_type,
+        hr_img_type):
+        """
+        :参数 split: 'train' 或 'test'
+        :参数 crop_size: 高分辨率图像裁剪尺寸
+        :参数 scaling_factor: 放大比例
+        :参数 lr_img_type: 低分辨率图像预处理方式
+        :参数 hr_img_type: 高分辨率图像预处理方式
+        """
+        self.split = split.lower()
+        self.crop_size = crop_size
+        self.scaling_factor = scaling_factor
+        self.lr_img_type = lr_img_type
+        self.hr_img_type = hr_img_type
+        assert self.split in {'train', 'test'}
+
+    def __call__(self, img):
+        """
+        对图像进行裁剪和下采样形成低分辨率图像
+        :参数 img: 由PIL库读取的图像
+        :返回: 特定形式的低分辨率和高分辨率图像
+        """
+        if self.split == 'train':
+            left = random.randint(0, img.width - self.crop_size)
+            top = random.randint(0, img.height - self.crop_size)
+            right = left + self.crop_size
+            bottom = top + self.crop_size
+            hr_img = img.crop((left, top, right, bottom))
+        else:
+            x_remainder = img.width % self.scaling_factor
+            y_remainder = img.height % self.scaling_factor
+            left = x_remainder // 2
+            top = y_remainder // 2
+            right = left + (img.width - x_remainder)
+            bottom = top + (img.height - y_remainder)
+            hr_img = img.crop((left, top, right, bottom))
+        lr_img = hr_img.resize((int(hr_img.width / self.scaling_factor),
+            int(hr_img.height / self.scaling_factor)), Image.BICUBIC)
+        assert hr_img.width == lr_img.width * self.scaling_factor and hr_img.height == lr_img.height * self.scaling_factor
+        lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
+        hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
+        return lr_img, hr_img
+
+
+class AverageMeter(object):
+    """
+    跟踪记录类，用于统计一组数据的平均值、累加和、数据个数.
+    """
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+
+def clip_gradient(optimizer, grad_clip):
+    """
+    丢弃梯度防止计算过程中梯度爆炸.
+
+    :参数 optimizer: 优化器，其梯度将被截断
+    :参数 grad_clip: 截断值
+    """
+    for group in optimizer.param_groups:
+        for param in group['params']:
+            if param.grad is not None:
+                param.grad.data.clamp_(-grad_clip, grad_clip)
+
+
+def save_checkpoint(state, filename):
+    """
+    保存训练结果.
+
+    :参数 state: 逐项预保存内容
+    """
+    paddle.save(obj=state, path=filename)
+
+
+def adjust_learning_rate(optimizer, shrink_factor):
+    """
+    调整学习率.
+
+    :参数 optimizer: 需要调整的优化器
+    :参数 shrink_factor: 调整因子，范围在 (0, 1) 之间，用于乘上原学习率.
+    """
+    print('\n调整学习率.')
+    for param_group in optimizer.param_groups:
+        param_group['lr'] *= shrink_factor
+
+
+def weights_init_kaiming(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+    elif classname.find('Linear') != -1:
+        nn.init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+    elif classname.find('BatchNorm') != -1:
+        m.weight.data.normal_(mean=0, std=math.sqrt(2.0 / 9.0 / 64.0)).clip_(
+            min=-0.025, max=0.025)
+        nn.init.constant(m.bias.data, 0.0)
+
+
+def batch_PSNR(img, imclean, data_range):
+    Img = img.data.cpu().numpy().astype(np.float32)
+    Iclean = imclean.data.cpu().numpy().astype(np.float32)
+    PSNR = 0
+    for i in range(tuple(Img.shape)[0]):
+        PSNR += compare_psnr(Iclean[i, :, :, :], Img[i, :, :, :],
+            data_range=data_range)
+    return PSNR / tuple(Img.shape)[0]
+
+
+def data_augmentation(image, mode):
+    x = np
+    perm_0 = list(range(x.ndim))
+    perm_0[image] = 1, 2, 0
+    perm_0[1, 2, 0] = image
+    out = x.transpose(perm=perm_0)
+    if mode == 0:
+        out = out
+    elif mode == 1:
+        out = np.flipud(out)
+    elif mode == 2:
+        out = np.rot90(k=out)
+    elif mode == 3:
+        out = np.rot90(k=out)
+        out = np.flipud(out)
+    elif mode == 4:
+        out = np.rot90(k=2)
+    elif mode == 5:
+        out = np.rot90(k=2)
+        out = np.flipud(out)
+    elif mode == 6:
+        out = np.rot90(k=3)
+    elif mode == 7:
+        out = np.rot90(k=3)
+        out = np.flipud(out)
+    x = np
+    perm_1 = list(range(x.ndim))
+    perm_1[out] = 2, 0, 1
+    perm_1[2, 0, 1] = out
+    return x.transpose(perm=perm_1)
+
+
+################################################################################
+# File: D:\研一\南网数研院\GAN\torch2padle\utils_paddle\paddle_aux.py
+################################################################################
+
+
+# This file is generated by PaConvert ToolKit, please Don't edit it!
+import paddle
+
+def reshape(self, *args, **kwargs):
+    if args:
+        if len(args)==1 and isinstance(args[0], (tuple, list)):
+            return paddle.reshape(self, args[0])
+        else:
+            return paddle.reshape(self, list(args))
+    elif kwargs:
+        assert 'shape' in kwargs
+        return paddle.reshape(self, shape=kwargs['shape'])
+
+setattr(paddle.Tensor, 'reshape', reshape)
+
+def min_class_func(self, *args, **kwargs):
+    if 'other' in kwargs:
+        kwargs['y'] = kwargs.pop('other')
+        ret = paddle.minimum(self, *args, **kwargs)
+    elif len(args)==1 and isinstance(args[0], paddle.Tensor):
+        ret = paddle.minimum(self, *args, **kwargs)
+    else:
+        if 'dim' in kwargs:
+            kwargs['axis'] = kwargs.pop('dim')
+
+        if 'axis' in kwargs or len(args) >= 1:
+            ret = paddle.min(self, *args, **kwargs), paddle.argmin(self, *args, **kwargs)
+        else:
+            ret = paddle.min(self, *args, **kwargs)
+
+    return ret
+
+def max_class_func(self, *args, **kwargs):
+    if 'other' in kwargs:
+        kwargs['y'] = kwargs.pop('other')
+        ret = paddle.maximum(self, *args, **kwargs)
+    elif len(args)==1 and isinstance(args[0], paddle.Tensor):
+        ret = paddle.maximum(self, *args, **kwargs)
+    else:
+        if 'dim' in kwargs:
+            kwargs['axis'] = kwargs.pop('dim')
+
+        if 'axis' in kwargs or len(args) >= 1:
+            ret = paddle.max(self, *args, **kwargs), paddle.argmax(self, *args, **kwargs)
+        else:
+            ret = paddle.max(self, *args, **kwargs)
+
+    return ret
+
+setattr(paddle.Tensor, "min", min_class_func)
+setattr(paddle.Tensor, "max", max_class_func)

@@ -1,0 +1,112 @@
+===========================================
+PyTorch to Paddle Convert Start ------>:
+===========================================
+Start convert file: D:\研一\南网数研院\GAN\venv\models.py --> D:\研一\南网数研院\GAN\torch2padle\models.py
+[models.py:1] remove 'import torch' 
+[models.py:2] remove 'from torch import nn' 
+[models.py:3] remove 'import torchvision' 
+[models.py:5] remove 'import torch.nn.functional as F' 
+[models.py] add 'import paddle' in line 1
+[models.py] insert extra 1 lines on finally
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:33] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:33] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:38] Start convert torch.nn.BatchNorm2d to Paddle --> 
+[models.py:38] [Success] Convert torch.nn.BatchNorm2d to Paddle
+[models.py:42] Start convert torch.nn.PReLU to Paddle --> 
+[models.py:42] [Success] Convert torch.nn.PReLU to Paddle
+[models.py:44] Start convert torch.nn.LeakyReLU to Paddle --> 
+[models.py:44] [Success] Convert torch.nn.LeakyReLU to Paddle
+[models.py:46] Start convert torch.nn.Tanh to Paddle --> 
+[models.py:46] [Success] Convert torch.nn.Tanh to Paddle
+[models.py:49] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:49] [Success] Convert torch.nn.Sequential to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:78] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:78] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:81] Start convert torch.nn.PixelShuffle to Paddle --> 
+[models.py:81] [Success] Convert torch.nn.PixelShuffle to Paddle
+[models.py:83] Start convert torch.nn.PReLU to Paddle --> 
+[models.py:83] [Success] Convert torch.nn.PReLU to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:156] Start convert torch.nn.Dropout to Paddle --> 
+[models.py:156] [Success] Convert torch.nn.Dropout to Paddle
+[models.py:159] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:159] [Success] Convert torch.nn.Sequential to Paddle
+[models.py:166] Start convert torch.nn.Dropout to Paddle --> 
+[models.py:166] [Success] Convert torch.nn.Dropout to Paddle
+[models.py:169] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:169] [Success] Convert torch.nn.Sequential to Paddle
+[models.py:194] Start convert torch.nn.functional.interpolate to Paddle --> 
+[models.py:194] [Success] Convert torch.nn.functional.interpolate to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:254] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:254] [Success] Convert torch.nn.Sequential to Paddle
+[models.py:255] Start convert torch.nn.Dropout to Paddle --> 
+[models.py:255] [Success] Convert torch.nn.Dropout to Paddle
+[models.py:258] Start convert torch.nn.AdaptiveAvgPool2d to Paddle --> 
+[models.py:258] [Success] Convert torch.nn.AdaptiveAvgPool2d to Paddle
+[models.py:260] Start convert torch.nn.Linear to Paddle --> 
+[models.py:260] [Success] Convert torch.nn.Linear to Paddle
+[models.py:262] Start convert torch.nn.LeakyReLU to Paddle --> 
+[models.py:262] [Success] Convert torch.nn.LeakyReLU to Paddle
+[models.py:264] Start convert torch.nn.Linear to Paddle --> 
+[models.py:264] [Success] Convert torch.nn.Linear to Paddle
+[models.py:275] Start convert Class Method: torch.Tensor.size to Paddle --> 
+[models.py:275] [Success] Convert Class Method: torch.Tensor.size to Paddle
+[models.py:279] Start convert Class Method: torch.Tensor.view to Paddle --> 
+When convert torch.Tensor.view, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[models.py] add 'import paddle_aux'
+[models.py:279] [Success] Convert Class Method: torch.Tensor.view to Paddle, just remain the same
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:293] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:293] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:294] Start convert torch.nn.ReLU to Paddle --> 
+[models.py:294] [Success] Convert torch.nn.ReLU to Paddle
+[models.py:296] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:296] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:297] Start convert torch.nn.BatchNorm2d to Paddle --> 
+[models.py:297] [Success] Convert torch.nn.BatchNorm2d to Paddle
+[models.py:298] Start convert torch.nn.ReLU to Paddle --> 
+[models.py:298] [Success] Convert torch.nn.ReLU to Paddle
+[models.py:299] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:299] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:300] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:300] [Success] Convert torch.nn.Sequential to Paddle
+[models.py:1] Start convert torch.nn.Module to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Module to Paddle
+[models.py:318] Start convert torchvision.models.vgg19 to Paddle --> 
+[models.py:318] [Not Support] convert torchvision.models.vgg19 to Paddle is not supported currently
+[models.py:1] Start convert torch.nn.Conv2d to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.Conv2d to Paddle
+[models.py:1] Start convert torch.nn.MaxPool2d to Paddle --> 
+[models.py:1] [Success] Convert torch.nn.MaxPool2d to Paddle
+[models.py:344] Start convert torch.nn.Sequential to Paddle --> 
+[models.py:344] [Success] Convert torch.nn.Sequential to Paddle
+[models.py] insert extra 3 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\models.py --> D:\研一\南网数研院\GAN\torch2padle\models.py
+
+
+===========================================
+Convert Summary:
+===========================================
+There are 41 Pytorch APIs in this Project:
+ 40  Pytorch APIs have been converted to Paddle successfully!
+ 1  Pytorch APIs are not supported to convert to Paddle currently!
+ Convert Rate is: 97.561%
+
+For these 1 Pytorch APIs that currently do not support to convert, which have been marked by >>> before the line, 
+please refer to https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_cn.html 
+and convert it by yourself manually. In addition, these APIs will be supported in future.
+
+Thank you to use Paddle Code Convert Tool. You can make any suggestions to us.
+

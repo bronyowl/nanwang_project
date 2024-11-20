@@ -1,0 +1,455 @@
+===========================================
+PyTorch to Paddle Convert Start ------>:
+===========================================
+Start convert file: D:\研一\南网数研院\GAN\venv\creat_data_lists.py --> D:\研一\南网数研院\GAN\torch2padle\creat_data_lists.py
+Finish convert D:\研一\南网数研院\GAN\venv\creat_data_lists.py --> D:\研一\南网数研院\GAN\torch2padle\creat_data_lists.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\creat_trainImage_lists.py --> D:\研一\南网数研院\GAN\torch2padle\creat_trainImage_lists.py
+[creat_trainImage_lists.py:5] remove 'import os' 
+[creat_trainImage_lists.py] add 'import os' in line 1
+[creat_trainImage_lists.py] insert extra 1 lines on finally
+[creat_trainImage_lists.py:16] Start convert Class Method: torch.Tensor.reshape to Paddle --> 
+When convert torch.Tensor.reshape, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[creat_trainImage_lists.py] add 'import paddle_aux'
+[creat_trainImage_lists.py:16] [Success] Convert Class Method: torch.Tensor.reshape to Paddle, just remain the same
+[creat_trainImage_lists.py:19] Start convert Class Method: torch.Tensor.reshape to Paddle --> 
+When convert torch.Tensor.reshape, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[creat_trainImage_lists.py] add 'import paddle_aux'
+[creat_trainImage_lists.py:19] [Success] Convert Class Method: torch.Tensor.reshape to Paddle, just remain the same
+[creat_trainImage_lists.py] insert extra 3 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\creat_trainImage_lists.py --> D:\研一\南网数研院\GAN\torch2padle\creat_trainImage_lists.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\datasets.py --> D:\研一\南网数研院\GAN\torch2padle\datasets.py
+[datasets.py:1] remove 'import torch' 
+[datasets.py:2] remove 'from torch.utils.data import Dataset' 
+[datasets.py:4] remove 'import os' 
+[datasets.py] add 'import paddle' in line 1
+[datasets.py] add 'import os' in line 2
+[datasets.py] insert extra 2 lines on finally
+[datasets.py:1] Start convert torch.utils.data.Dataset to Paddle --> 
+[datasets.py:1] [Success] Convert torch.utils.data.Dataset to Paddle
+Finish convert D:\研一\南网数研院\GAN\venv\datasets.py --> D:\研一\南网数研院\GAN\torch2padle\datasets.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\model.py --> D:\研一\南网数研院\GAN\torch2padle\model.py
+[model.py:1] remove 'import torch' 
+[model.py:2] remove 'from torch import nn' 
+[model.py:3] remove 'import torchvision' 
+[model.py:5] remove 'import torch.nn.functional as F' 
+[model.py] add 'import paddle' in line 1
+[model.py] insert extra 1 lines on finally
+[model.py:1] Start convert torch.nn.Module to Paddle --> 
+[model.py:1] [Success] Convert torch.nn.Module to Paddle
+[model.py:33] Start convert torch.nn.Conv2d to Paddle --> 
+[model.py:33] [Success] Convert torch.nn.Conv2d to Paddle
+[model.py:38] Start convert torch.nn.BatchNorm2d to Paddle --> 
+[model.py:38] [Success] Convert torch.nn.BatchNorm2d to Paddle
+[model.py:42] Start convert torch.nn.PReLU to Paddle --> 
+[model.py:42] [Success] Convert torch.nn.PReLU to Paddle
+[model.py:44] Start convert torch.nn.LeakyReLU to Paddle --> 
+[model.py:44] [Success] Convert torch.nn.LeakyReLU to Paddle
+[model.py:46] Start convert torch.nn.Tanh to Paddle --> 
+[model.py:46] [Success] Convert torch.nn.Tanh to Paddle
+[model.py:49] Start convert torch.nn.Sequential to Paddle --> 
+[model.py:49] [Success] Convert torch.nn.Sequential to Paddle
+[model.py:1] Start convert torch.nn.Module to Paddle --> 
+[model.py:1] [Success] Convert torch.nn.Module to Paddle
+[model.py:78] Start convert torch.nn.Conv2d to Paddle --> 
+[model.py:78] [Success] Convert torch.nn.Conv2d to Paddle
+[model.py:81] Start convert torch.nn.PixelShuffle to Paddle --> 
+[model.py:81] [Success] Convert torch.nn.PixelShuffle to Paddle
+[model.py:83] Start convert torch.nn.PReLU to Paddle --> 
+[model.py:83] [Success] Convert torch.nn.PReLU to Paddle
+[model.py:1] Start convert torch.nn.Module to Paddle --> 
+[model.py:1] [Success] Convert torch.nn.Module to Paddle
+[model.py:1] Start convert torch.nn.Module to Paddle --> 
+[model.py:1] [Success] Convert torch.nn.Module to Paddle
+[model.py:158] Start convert torch.nn.Sequential to Paddle --> 
+[model.py:158] [Success] Convert torch.nn.Sequential to Paddle
+[model.py:170] Start convert torch.nn.Sequential to Paddle --> 
+[model.py:170] [Success] Convert torch.nn.Sequential to Paddle
+[model.py:194] Start convert torch.nn.functional.interpolate to Paddle --> 
+[model.py:194] [Success] Convert torch.nn.functional.interpolate to Paddle
+Finish convert D:\研一\南网数研院\GAN\venv\model.py --> D:\研一\南网数研院\GAN\torch2padle\model.py
+
+No need to convert, just Copy D:\研一\南网数研院\GAN\venv\pyvenv.cfg --> D:\研一\南网数研院\GAN\torch2padle\pyvenv.cfg
+
+Start convert file: D:\研一\南网数研院\GAN\venv\test.py --> D:\研一\南网数研院\GAN\torch2padle\test.py
+[test.py:2] remove 'from torch import nn' 
+[test.py:9] remove 'import os' 
+[test.py] add 'import paddle' in line 1
+[test.py] add 'import os' in line 2
+[test.py] insert extra 2 lines on finally
+[test.py:35] Start convert Class Method: torch.Tensor.reshape to Paddle --> 
+When convert torch.Tensor.reshape, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[test.py] add 'import paddle_aux'
+[test.py:35] [Success] Convert Class Method: torch.Tensor.reshape to Paddle, just remain the same
+[test.py:35] Start convert Class Method: torch.Tensor.flatten to Paddle --> 
+[test.py:35] [Success] Convert Class Method: torch.Tensor.flatten to Paddle
+[test.py:36] Start convert Class Method: torch.Tensor.reshape to Paddle --> 
+When convert torch.Tensor.reshape, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[test.py] add 'import paddle_aux'
+[test.py:36] [Success] Convert Class Method: torch.Tensor.reshape to Paddle, just remain the same
+[test.py:54] Start convert torch.cuda.is_available to Paddle --> 
+[test.py:54] [Success] Convert torch.cuda.is_available to Paddle
+[test.py:54] Start convert torch.device to Paddle --> 
+[test.py:54] [Success] Convert torch.device to Paddle
+[test.py:62] Start convert torch.load to Paddle --> 
+[test.py:62] [Success] Convert torch.load to Paddle
+[test.py:68] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[test.py:68] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[test.py:69] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[test.py:69] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[test.py:71] Start convert Class Method: torch.nn.Module.eval to Paddle --> 
+[test.py:71] [Success] Convert Class Method: torch.nn.Module.eval to Paddle, just remain the same
+[test.py:85] Start convert Class Method: torch.Tensor.unsqueeze_ to Paddle --> 
+[test.py:85] [Success] Convert Class Method: torch.Tensor.unsqueeze_ to Paddle
+[test.py:91] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[test.py:91] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[test.py:94] Start convert torch.no_grad to Paddle --> 
+[test.py:94] [Success] Convert torch.no_grad to Paddle
+[test.py:95] Start convert Class Method: torch.Tensor.squeeze to Paddle --> 
+[test.py:95] [Success] Convert Class Method: torch.Tensor.squeeze to Paddle
+[test.py:95] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[test.py:95] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[test.py:95] Start convert Class Method: torch.Tensor.detach to Paddle --> 
+[test.py:95] [Success] Convert Class Method: torch.Tensor.detach to Paddle
+[test.py:109] Start convert Class Attribute: torch.Tensor.T to Paddle --> 
+[test.py:109] [Success] Convert Class Attribute: torch.Tensor.T to Paddle, just remain the same
+[test.py:113] Start convert Class Method: torch.Tensor.max to Paddle --> 
+When convert torch.Tensor.max, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[test.py] add 'import paddle_aux'
+[test.py:113] [Success] Convert Class Method: torch.Tensor.max to Paddle, just remain the same
+[test.py:113] Start convert Class Method: torch.Tensor.min to Paddle --> 
+When convert torch.Tensor.min, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[test.py] add 'import paddle_aux'
+[test.py:113] [Success] Convert Class Method: torch.Tensor.min to Paddle, just remain the same
+[test.py:113] Start convert Class Method: torch.Tensor.min to Paddle --> 
+When convert torch.Tensor.min, write auxiliary code to file: D:\研一\南网数研院\GAN\torch2padle/utils/paddle_aux.py
+[test.py] add 'import paddle_aux'
+[test.py:113] [Success] Convert Class Method: torch.Tensor.min to Paddle, just remain the same
+[test.py] insert extra 3 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\test.py --> D:\研一\南网数研院\GAN\torch2padle\test.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\train_srgan.py --> D:\研一\南网数研院\GAN\torch2padle\train_srgan.py
+[train_srgan.py:1] remove 'import torch.backends.cudnn as cudnn' 
+[train_srgan.py:2] remove 'import torch' 
+[train_srgan.py:3] remove 'from torch import nn' 
+[train_srgan.py:4] remove 'from torchvision.utils import make_grid' 
+[train_srgan.py:5] remove 'from torch.utils.tensorboard import SummaryWriter' 
+[train_srgan.py] add 'import paddle' in line 1
+[train_srgan.py] insert extra 1 lines on finally
+[train_srgan.py:41] Start convert torch.cuda.is_available to Paddle --> 
+[train_srgan.py:41] [Success] Convert torch.cuda.is_available to Paddle
+[train_srgan.py:41] Start convert torch.device to Paddle --> 
+[train_srgan.py:41] [Success] Convert torch.device to Paddle
+[train_srgan.py:1] Start convert torch.backends.cudnn.benchmark to Paddle --> 
+[train_srgan.py:1] [Success] Convert torch.backends.cudnn.benchmark to Paddle
+[train_srgan.py:45] Start convert torch.utils.tensorboard.SummaryWriter to Paddle --> 
+[train_srgan.py:45] [Not Support] convert torch.utils.tensorboard.SummaryWriter to Paddle is not supported currently
+[train_srgan.py:68] Start convert Class Attribute: torch.Tensor.requires_grad to Paddle --> 
+[train_srgan.py:68] [Success] Convert Class Attribute: torch.Tensor.requires_grad to Paddle
+[train_srgan.py:68] Start convert Class Method: torch.nn.Module.parameters to Paddle --> 
+[train_srgan.py:68] [Success] Convert Class Method: torch.nn.Module.parameters to Paddle
+[train_srgan.py:68] Start convert torch.optim.Adam to Paddle --> 
+[train_srgan.py:68] [Success] Convert torch.optim.Adam to Paddle
+[train_srgan.py:69] Start convert Class Attribute: torch.Tensor.requires_grad to Paddle --> 
+[train_srgan.py:69] [Success] Convert Class Attribute: torch.Tensor.requires_grad to Paddle
+[train_srgan.py:69] Start convert Class Method: torch.nn.Module.parameters to Paddle --> 
+[train_srgan.py:69] [Success] Convert Class Method: torch.nn.Module.parameters to Paddle
+[train_srgan.py:69] Start convert torch.optim.Adam to Paddle --> 
+[train_srgan.py:69] [Success] Convert torch.optim.Adam to Paddle
+[train_srgan.py:72] Start convert torch.nn.MSELoss to Paddle --> 
+[train_srgan.py:72] [Success] Convert torch.nn.MSELoss to Paddle
+[train_srgan.py:73] Start convert torch.nn.BCEWithLogitsLoss to Paddle --> 
+[train_srgan.py:73] [Success] Convert torch.nn.BCEWithLogitsLoss to Paddle
+[train_srgan.py:76] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:76] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:77] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:77] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:78] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:78] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:79] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:79] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:82] Start convert torch.load to Paddle --> 
+[train_srgan.py:82] [Success] Convert torch.load to Paddle
+[train_srgan.py:86] Start convert torch.load to Paddle --> 
+[train_srgan.py:86] [Success] Convert torch.load to Paddle
+[train_srgan.py:88] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srgan.py:88] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srgan.py:89] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srgan.py:89] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srgan.py:90] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srgan.py:90] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srgan.py:91] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srgan.py:91] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srgan.py:94] Start convert torch.cuda.is_available to Paddle --> 
+[train_srgan.py:94] [Success] Convert torch.cuda.is_available to Paddle
+[train_srgan.py:95] Start convert torch.nn.DataParallel to Paddle --> 
+[train_srgan.py:95] [Success] Convert torch.nn.DataParallel to Paddle
+[train_srgan.py:96] Start convert torch.nn.DataParallel to Paddle --> 
+[train_srgan.py:96] [Success] Convert torch.nn.DataParallel to Paddle
+[train_srgan.py:104] Start convert torch.utils.data.DataLoader to Paddle --> 
+[train_srgan.py:104] [Success] Convert torch.utils.data.DataLoader to Paddle
+[train_srgan.py:119] Start convert Class Method: torch.nn.Module.train to Paddle --> 
+[train_srgan.py:119] [Success] Convert Class Method: torch.nn.Module.train to Paddle
+[train_srgan.py:120] Start convert Class Method: torch.nn.Module.train to Paddle --> 
+[train_srgan.py:120] [Success] Convert Class Method: torch.nn.Module.train to Paddle
+[train_srgan.py:131] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:131] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:132] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srgan.py:132] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srgan.py:147] Start convert torch.ones_like to Paddle --> 
+[train_srgan.py:147] [Success] Convert torch.ones_like to Paddle
+[train_srgan.py:153] Start convert Class Method: torch.nn.Module.zero_grad to Paddle --> 
+[train_srgan.py:153] [Not Support] convert Class Method: *.zero_grad to Paddle is not supported currently
+[train_srgan.py:154] Start convert Class Method: torch.Tensor.backward to Paddle --> 
+[train_srgan.py:154] [Success] Convert Class Method: torch.Tensor.backward to Paddle
+[train_srgan.py:157] Start convert Class Method: torch.optim.Optimizer.step to Paddle --> 
+[train_srgan.py:157] [Success] Convert Class Method: torch.optim.Optimizer.step to Paddle, just remain the same
+[train_srgan.py:160] Start convert Class Method: torch.Tensor.item to Paddle --> 
+[train_srgan.py:160] [Success] Convert Class Method: torch.Tensor.item to Paddle, just remain the same
+[train_srgan.py:160] Start convert Class Method: torch.Tensor.size to Paddle --> 
+[train_srgan.py:160] [Success] Convert Class Method: torch.Tensor.size to Paddle
+[train_srgan.py:161] Start convert Class Method: torch.Tensor.item to Paddle --> 
+[train_srgan.py:161] [Success] Convert Class Method: torch.Tensor.item to Paddle, just remain the same
+[train_srgan.py:161] Start convert Class Method: torch.Tensor.size to Paddle --> 
+[train_srgan.py:161] [Success] Convert Class Method: torch.Tensor.size to Paddle
+[train_srgan.py:166] Start convert Class Method: torch.Tensor.detach to Paddle --> 
+[train_srgan.py:166] [Success] Convert Class Method: torch.Tensor.detach to Paddle
+[train_srgan.py:169] Start convert torch.zeros_like to Paddle --> 
+[train_srgan.py:169] [Success] Convert torch.zeros_like to Paddle
+[train_srgan.py:170] Start convert torch.ones_like to Paddle --> 
+[train_srgan.py:170] [Success] Convert torch.ones_like to Paddle
+[train_srgan.py:174] Start convert Class Method: torch.nn.Module.zero_grad to Paddle --> 
+[train_srgan.py:174] [Not Support] convert Class Method: *.zero_grad to Paddle is not supported currently
+[train_srgan.py:175] Start convert Class Method: torch.Tensor.backward to Paddle --> 
+[train_srgan.py:175] [Success] Convert Class Method: torch.Tensor.backward to Paddle
+[train_srgan.py:178] Start convert Class Method: torch.optim.Optimizer.step to Paddle --> 
+[train_srgan.py:178] [Success] Convert Class Method: torch.optim.Optimizer.step to Paddle, just remain the same
+[train_srgan.py:181] Start convert Class Method: torch.Tensor.item to Paddle --> 
+[train_srgan.py:181] [Success] Convert Class Method: torch.Tensor.item to Paddle, just remain the same
+[train_srgan.py:181] Start convert Class Method: torch.Tensor.size to Paddle --> 
+[train_srgan.py:181] [Success] Convert Class Method: torch.Tensor.size to Paddle
+[train_srgan.py:185] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srgan.py:185] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srgan.py:185] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srgan.py:185] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srgan.py:186] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srgan.py:186] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srgan.py:186] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srgan.py:186] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srgan.py:187] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srgan.py:187] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srgan.py:187] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srgan.py:187] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srgan.py:205] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srgan.py:205] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srgan.py:206] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srgan.py:206] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srgan.py:207] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srgan.py:207] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srgan.py:208] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srgan.py:208] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srgan.py:203] Start convert torch.save to Paddle --> 
+[train_srgan.py:203] [Success] Convert torch.save to Paddle
+[train_srgan.py] insert extra 1 lines on finally
+[train_srgan.py] insert extra 1 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\train_srgan.py --> D:\研一\南网数研院\GAN\torch2padle\train_srgan.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\train_srresnet.py --> D:\研一\南网数研院\GAN\torch2padle\train_srresnet.py
+[train_srresnet.py:1] remove 'import torch.backends.cudnn as cudnn' 
+[train_srresnet.py:2] remove 'import torch' 
+[train_srresnet.py:3] remove 'from torch import nn' 
+[train_srresnet.py:4] remove 'from torchvision.utils import make_grid' 
+[train_srresnet.py:5] remove 'from torch.utils.tensorboard import SummaryWriter' 
+[train_srresnet.py] add 'import paddle' in line 1
+[train_srresnet.py] insert extra 1 lines on finally
+[train_srresnet.py:32] Start convert torch.cuda.is_available to Paddle --> 
+[train_srresnet.py:32] [Success] Convert torch.cuda.is_available to Paddle
+[train_srresnet.py:32] Start convert torch.device to Paddle --> 
+[train_srresnet.py:32] [Success] Convert torch.device to Paddle
+[train_srresnet.py:1] Start convert torch.backends.cudnn.benchmark to Paddle --> 
+[train_srresnet.py:1] [Success] Convert torch.backends.cudnn.benchmark to Paddle
+[train_srresnet.py:38] Start convert torch.utils.tensorboard.SummaryWriter to Paddle --> 
+[train_srresnet.py:38] [Not Support] convert torch.utils.tensorboard.SummaryWriter to Paddle is not supported currently
+[train_srresnet.py:54] Start convert Class Attribute: torch.Tensor.requires_grad to Paddle --> 
+[train_srresnet.py:54] [Success] Convert Class Attribute: torch.Tensor.requires_grad to Paddle
+[train_srresnet.py:54] Start convert Class Method: torch.nn.Module.parameters to Paddle --> 
+[train_srresnet.py:54] [Success] Convert Class Method: torch.nn.Module.parameters to Paddle
+[train_srresnet.py:54] Start convert torch.optim.Adam to Paddle --> 
+[train_srresnet.py:54] [Success] Convert torch.optim.Adam to Paddle
+[train_srresnet.py:57] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srresnet.py:57] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srresnet.py:58] Start convert torch.nn.MSELoss to Paddle --> 
+[train_srresnet.py:58] [Success] Convert torch.nn.MSELoss to Paddle
+[train_srresnet.py:58] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srresnet.py:58] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srresnet.py:62] Start convert torch.load to Paddle --> 
+[train_srresnet.py:62] [Success] Convert torch.load to Paddle
+[train_srresnet.py:64] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srresnet.py:64] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srresnet.py:65] Start convert Class Method: torch.nn.Module.load_state_dict to Paddle --> 
+[train_srresnet.py:65] [Success] Convert Class Method: torch.nn.Module.load_state_dict to Paddle
+[train_srresnet.py:67] Start convert torch.cuda.is_available to Paddle --> 
+[train_srresnet.py:67] [Success] Convert torch.cuda.is_available to Paddle
+[train_srresnet.py:68] Start convert torch.nn.DataParallel to Paddle --> 
+[train_srresnet.py:68] [Success] Convert torch.nn.DataParallel to Paddle
+[train_srresnet.py:76] Start convert torch.utils.data.DataLoader to Paddle --> 
+[train_srresnet.py:76] [Success] Convert torch.utils.data.DataLoader to Paddle
+[train_srresnet.py:85] Start convert Class Method: torch.nn.Module.train to Paddle --> 
+[train_srresnet.py:85] [Success] Convert Class Method: torch.nn.Module.train to Paddle
+[train_srresnet.py:94] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srresnet.py:94] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srresnet.py:95] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[train_srresnet.py:95] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[train_srresnet.py:104] Start convert Class Method: torch.nn.Module.zero_grad to Paddle --> 
+[train_srresnet.py:104] [Not Support] convert Class Method: *.zero_grad to Paddle is not supported currently
+[train_srresnet.py:105] Start convert Class Method: torch.Tensor.backward to Paddle --> 
+[train_srresnet.py:105] [Success] Convert Class Method: torch.Tensor.backward to Paddle
+[train_srresnet.py:108] Start convert Class Method: torch.optim.Optimizer.step to Paddle --> 
+[train_srresnet.py:108] [Success] Convert Class Method: torch.optim.Optimizer.step to Paddle, just remain the same
+[train_srresnet.py:111] Start convert Class Method: torch.Tensor.item to Paddle --> 
+[train_srresnet.py:111] [Success] Convert Class Method: torch.Tensor.item to Paddle, just remain the same
+[train_srresnet.py:111] Start convert Class Method: torch.Tensor.size to Paddle --> 
+[train_srresnet.py:111] [Success] Convert Class Method: torch.Tensor.size to Paddle
+[train_srresnet.py:115] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srresnet.py:115] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srresnet.py:115] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srresnet.py:115] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srresnet.py:116] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srresnet.py:116] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srresnet.py:116] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srresnet.py:116] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srresnet.py:117] Start convert Class Method: torch.Tensor.cpu to Paddle --> 
+[train_srresnet.py:117] [Success] Convert Class Method: torch.Tensor.cpu to Paddle
+[train_srresnet.py:117] Start convert torchvision.utils.make_grid to Paddle --> 
+[train_srresnet.py:117] [Not Support] convert torchvision.utils.make_grid to Paddle is not supported currently
+[train_srresnet.py:131] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srresnet.py:131] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srresnet.py:132] Start convert Class Method: torch.nn.Module.state_dict to Paddle --> 
+[train_srresnet.py:132] [Success] Convert Class Method: torch.nn.Module.state_dict to Paddle
+[train_srresnet.py:129] Start convert torch.save to Paddle --> 
+[train_srresnet.py:129] [Success] Convert torch.save to Paddle
+[train_srresnet.py] insert extra 1 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\train_srresnet.py --> D:\研一\南网数研院\GAN\torch2padle\train_srresnet.py
+
+Start convert file: D:\研一\南网数研院\GAN\venv\utils.py --> D:\研一\南网数研院\GAN\torch2padle\utils.py
+[utils.py:2] remove 'import os' 
+[utils.py:5] remove 'import torchvision.transforms.functional as FT' 
+[utils.py:6] remove 'import torch' 
+[utils.py] add 'import paddle' in line 1
+[utils.py] add 'import os' in line 2
+[utils.py] insert extra 2 lines on finally
+[utils.py:11] Start convert torch.cuda.is_available to Paddle --> 
+[utils.py:11] [Success] Convert torch.cuda.is_available to Paddle
+[utils.py:11] Start convert torch.device to Paddle --> 
+[utils.py:11] [Success] Convert torch.device to Paddle
+[utils.py:14] Start convert torch.FloatTensor to Paddle --> 
+[utils.py:14] [Success] Convert torch.FloatTensor to Paddle
+[utils.py:14] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[utils.py:14] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[utils.py:15] Start convert torch.FloatTensor to Paddle --> 
+[utils.py:15] [Success] Convert torch.FloatTensor to Paddle
+[utils.py:15] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:15] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:15] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:15] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:17] Start convert torch.FloatTensor to Paddle --> 
+[utils.py:17] [Success] Convert torch.FloatTensor to Paddle
+[utils.py:17] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:17] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:17] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:17] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:19] Start convert torch.FloatTensor to Paddle --> 
+[utils.py:19] [Success] Convert torch.FloatTensor to Paddle
+[utils.py:19] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[utils.py:19] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[utils.py:19] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:19] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:19] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:19] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:19] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:19] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:21] Start convert torch.FloatTensor to Paddle --> 
+[utils.py:21] [Success] Convert torch.FloatTensor to Paddle
+[utils.py:21] Start convert Class Method: torch.Tensor.to to Paddle --> 
+[utils.py:21] [Success] Convert Class Method: torch.Tensor.to to Paddle
+[utils.py:21] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:21] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:21] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:21] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:21] Start convert Class Method: torch.Tensor.unsqueeze to Paddle --> 
+[utils.py:21] [Success] Convert Class Method: torch.Tensor.unsqueeze to Paddle
+[utils.py:47] Start convert Class Method: torch.Tensor.split to Paddle --> 
+[utils.py:47]  Misidentify Class Method: torch.Tensor.split
+[utils.py:86] Start convert torchvision.transforms.functional.to_tensor to Paddle --> 
+[utils.py:86] [Not Support] convert torchvision.transforms.functional.to_tensor to Paddle is not supported currently
+[utils.py:96] Start convert torchvision.transforms.functional.to_pil_image to Paddle --> 
+[utils.py:96] [Not Support] convert torchvision.transforms.functional.to_pil_image to Paddle is not supported currently
+[utils.py:108] Start convert Class Method: torch.Tensor.ndimension to Paddle --> 
+[utils.py:108] [Success] Convert Class Method: torch.Tensor.ndimension to Paddle
+[utils.py:110] Start convert Class Method: torch.Tensor.ndimension to Paddle --> 
+[utils.py:110] [Success] Convert Class Method: torch.Tensor.ndimension to Paddle
+[utils.py:116] Start convert Class Method: torch.Tensor.permute to Paddle --> 
+[utils.py:116] [Success] Convert Class Method: torch.Tensor.permute to Paddle
+[utils.py:116] Start convert torch.linalg.matmul to Paddle --> 
+[utils.py:116] [Success] Convert torch.linalg.matmul to Paddle
+[utils.py:215] Start convert Class Attribute: torch.Tensor.grad to Paddle --> 
+[utils.py:215] [Success] Convert Class Attribute: torch.Tensor.grad to Paddle, just remain the same
+[utils.py:226] Start convert torch.save to Paddle --> 
+[utils.py:226] [Success] Convert torch.save to Paddle
+[utils.py:257] Start convert Class Method: torch.Tensor.clamp_ to Paddle --> 
+[utils.py:257] [Success] Convert Class Method: torch.Tensor.clamp_ to Paddle
+[utils.py:266] Start convert Class Method: torch.Tensor.numpy to Paddle --> 
+[utils.py:266] [Success] Convert Class Method: torch.Tensor.numpy to Paddle
+[utils.py:267] Start convert Class Method: torch.Tensor.numpy to Paddle --> 
+[utils.py:267] [Success] Convert Class Method: torch.Tensor.numpy to Paddle
+[utils.py:271] Start convert Class Attribute: torch.Tensor.shape to Paddle --> 
+[utils.py:271] [Success] Convert Class Attribute: torch.Tensor.shape to Paddle
+[utils.py:274] Start convert Class Attribute: torch.Tensor.shape to Paddle --> 
+[utils.py:274] [Success] Convert Class Attribute: torch.Tensor.shape to Paddle
+[utils.py:280] Start convert Class Method: torch.Tensor.transpose to Paddle --> 
+[utils.py:280] [Success] Convert Class Method: torch.Tensor.transpose to Paddle
+[utils.py:287] Start convert Class Method: torch.Tensor.flipud to Paddle --> 
+[utils.py:287]  Misidentify Class Method: torch.Tensor.flipud
+[utils.py:290] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:290] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:293] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:293] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:294] Start convert Class Method: torch.Tensor.flipud to Paddle --> 
+[utils.py:294]  Misidentify Class Method: torch.Tensor.flipud
+[utils.py:297] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:297] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:300] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:300] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:301] Start convert Class Method: torch.Tensor.flipud to Paddle --> 
+[utils.py:301]  Misidentify Class Method: torch.Tensor.flipud
+[utils.py:304] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:304] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:307] Start convert Class Method: torch.Tensor.rot90 to Paddle --> 
+[utils.py:307] [Success] Convert Class Method: torch.Tensor.rot90 to Paddle
+[utils.py:308] Start convert Class Method: torch.Tensor.flipud to Paddle --> 
+[utils.py:308]  Misidentify Class Method: torch.Tensor.flipud
+[utils.py:310] Start convert Class Method: torch.Tensor.transpose to Paddle --> 
+[utils.py:310] [Success] Convert Class Method: torch.Tensor.transpose to Paddle
+[utils.py] insert extra 4 lines on finally
+[utils.py] insert extra 4 lines on finally
+Finish convert D:\研一\南网数研院\GAN\venv\utils.py --> D:\研一\南网数研院\GAN\torch2padle\utils.py
+
+No need to convert, just Copy D:\研一\南网数研院\GAN\venv\程序说明.txt --> D:\研一\南网数研院\GAN\torch2padle\程序说明.txt
+
+
+===========================================
+Convert Summary:
+===========================================
+There are 169 Pytorch APIs in this Project:
+ 156  Pytorch APIs have been converted to Paddle successfully!
+ 13  Pytorch APIs are not supported to convert to Paddle currently!
+ Convert Rate is: 92.308%
+
+For these 13 Pytorch APIs that currently do not support to convert, which have been marked by >>> before the line, 
+please refer to https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_cn.html 
+and convert it by yourself manually. In addition, these APIs will be supported in future.
+
+Thank you to use Paddle Code Convert Tool. You can make any suggestions to us.
+
