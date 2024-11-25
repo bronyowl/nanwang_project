@@ -174,33 +174,24 @@ class SRResNet(paddle.nn.Layer):
 
 
 class Generator(paddle.nn.Layer):
-    """
-    生成器模型，其结构与SRResNet完全一致.
-    """
-
-    def __init__(self, large_kernel_size=9, small_kernel_size=3, n_channels
-        =64, n_blocks=16, scaling_factors=8):
-        """
-        参数 large_kernel_size：第一层和最后一层卷积核大小
-        参数 small_kernel_size：中间层卷积核大小
-        参数 n_channels：中间层卷积通道数
-        参数 n_blocks: 残差模块数量
-        参数 scaling_factor: 放大比例
-        """
+    def __init__(self, large_kernel_size=9, small_kernel_size=3, n_channels=64, 
+                 n_blocks=16, scaling_factors=8, target_size=(100, 100)):  # 添加target_size参数
         super(Generator, self).__init__()
-        self.net = SRResNet(large_kernel_size=large_kernel_size,
-            small_kernel_size=small_kernel_size, n_channels=n_channels,
-            n_blocks=n_blocks, scaling_factors=scaling_factors)
-
+        self.net = SRResNet(
+            large_kernel_size=large_kernel_size,
+            small_kernel_size=small_kernel_size, 
+            n_channels=n_channels,
+            n_blocks=n_blocks, 
+            scaling_factors=scaling_factors,
+            target_size=target_size  # 传递给SRResNet
+        )
+    
     def forward(self, lr_imgs):
-        """
-        前向传播.
-
-        参数 lr_imgs: 低精度图像 (N, 3, w, h)
-        返回: 超分重建图像 (N, 3, w * scaling factor, h * scaling factor)
-        """
         sr_imgs = self.net(lr_imgs)
         return sr_imgs
+        
+    def set_net_state_dict(self, state_dict):
+        self.net.set_state_dict(state_dict)
 
 
 class Discriminator(paddle.nn.Layer):

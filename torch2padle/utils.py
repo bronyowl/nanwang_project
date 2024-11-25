@@ -201,8 +201,10 @@ def adjust_learning_rate(optimizer, shrink_factor):
     :参数 shrink_factor: 调整因子，范围在 (0, 1) 之间，用于乘上原学习率.
     """
     print('\n调整学习率.')
-    for param_group in optimizer.param_groups:
-        param_group['lr'] *= shrink_factor
+    current_lr = optimizer.get_lr()
+    new_lr = current_lr * shrink_factor
+    optimizer.set_lr(new_lr)
+    print(f'学习率从 {current_lr} 调整为 {new_lr}')
 
 
 def weights_init_kaiming(m):

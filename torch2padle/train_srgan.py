@@ -6,7 +6,7 @@ from datasets import SRDataset
 from utils import *
 from visualdl import LogWriter
 
-data_folder = 'D:\\Data_fusion\\data'
+data_folder = './data'
 crop_size = 100
 scaling_factors = 8
 scaling_factor = 10
@@ -15,8 +15,7 @@ large_kernel_size_g = 9
 small_kernel_size_g = 3
 n_channels_g = 64
 n_blocks_g = 5
-srresnet_checkpoint = (
-    'D:\\Data_fusion/x10/results_meas/db9/horizontal/checkpoint_srresnet.pth')
+srresnet_checkpoint = './checkpoints/srresnet/srresnet.pdparams'
 kernel_size_d = 3
 n_channels_d = 64
 n_blocks_d = 8
@@ -25,7 +24,7 @@ batch_size = 128
 start_epoch = 1
 epochs = 50
 checkpoint = None
-workers = 4
+workers = 0
 beta = 0.001
 lr = 0.001
 device = str('cuda' if paddle.device.cuda.device_count() >= 1 else 'cpu'
@@ -42,7 +41,7 @@ def main():
     global checkpoint, start_epoch, writer
     generator = Generator(large_kernel_size=large_kernel_size_g,
         small_kernel_size=small_kernel_size_g, n_channels=n_channels_g,
-        n_blocks=n_blocks_g, scaling_factors=scaling_factors)
+        n_blocks=n_blocks_g, scaling_factors=scaling_factors, target_size=target_size)
     discriminator = Discriminator(kernel_size=kernel_size_d, n_channels=
         n_channels_d, n_blocks=n_blocks_d, fc_size=fc_size_d)
     optimizer_g = paddle.optimizer.Adam(parameters=filter(lambda p: not p.
@@ -58,7 +57,7 @@ def main():
     content_loss_criterion = content_loss_criterion.to(device)
     adversarial_loss_criterion = adversarial_loss_criterion.to(device)
     srresnetcheckpoint = paddle.load(path=srresnet_checkpoint)
-    generator.net.load_state_dict(srresnetcheckpoint['model'])
+    generator.set_net_state_dict(srresnetcheckpoint['model'])
     if checkpoint is not None:
         checkpoint = paddle.load(path=checkpoint)
         start_epoch = checkpoint['epoch'] + 1
@@ -73,7 +72,7 @@ def main():
         crop_size, scaling_factor=scaling_factor, lr_img_type=
         'imagenet-norm', hr_img_type='imagenet-norm')
     train_loader = paddle.io.DataLoader(dataset=train_dataset, batch_size=
-        batch_size, shuffle=True, num_workers=workers)
+        batch_size, shuffle=True, num_workers=workers, places=device)
     for epoch in range(start_epoch, epochs + 1):
         if epoch == int(epochs / 2):
             adjust_learning_rate(optimizer_g, 0.1)
@@ -86,8 +85,6 @@ def main():
         losses_d = AverageMeter()
         n_iter = len(train_loader)
         for i, (lr_imgs, hr_imgs) in enumerate(train_loader):
-            lr_imgs = lr_imgs.to(device)
-            hr_imgs = hr_imgs.to(device)
             sr_imgs = generator(lr_imgs)
             sr_imgs = convert_image(sr_imgs, source='[-1, 1]', target=
                 'imagenet-norm')
@@ -132,7 +129,7 @@ def main():
             ), 'discriminator': discriminator.state_dict(), 'optimizer_g':
             optimizer_g.state_dict(), 'optimizer_d': optimizer_d.state_dict
             ()}, path=
-            'D:\\Data_fusion/x10/results_meas/db9/horizontal/checkpoint_srgan.pth'
+            './checkpoints/srgan/checkpoint_srgan.pdparams'
             )
         writer.close()
 

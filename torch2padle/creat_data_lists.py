@@ -2,7 +2,9 @@
 
 from utils import create_data_lists
 if __name__ == '__main__':
-    create_data_lists(train_folders=[
-        'C:/Users\\cbbis\\Desktop\\Data_fusion/x10/train'], test_folders=[
-        'C:/Users/cbbis/Desktop/Data_fusion/x10/test'], min_size=10,
-        output_folder='C:/Users/cbbis/Desktop/Data_fusion/data')
+    create_data_lists(
+        train_folders=['./datasets/train/images'],
+        test_folders=['./datasets/test/images'],
+        min_size=10,
+        output_folder='./data'
+    )
